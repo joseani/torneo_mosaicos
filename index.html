@@ -12,7 +12,7 @@
     padding: 20px;
     text-align: center;
     color: #222;
-  } 
+  }
   h1 { font-size: 1.4em; margin-bottom: 5px; }
   #progreso {
     color: #666;
@@ -81,7 +81,7 @@
 </head>
 <body>
 
-<h1>¿Cuál de estas dos imágenes se parece más al motivo original?</h1>
+<h1 id="pregunta"></h1>
 <div id="progreso"></div>
 
 <div id="contenedor-partido"></div>
@@ -98,6 +98,15 @@
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw284RJ7LTEetMTGXjrnH3-uF9mUuaV-E1QUuYdOh6Y9abeqUuZ7d4ufQ2LHVpJKCuKTg/exec";
 
 const motivos = ["einstein", "frankenstein", "liberty", "mona"];
+
+const nombresLegibles = {
+  "einstein": "Albert Einstein",
+  "frankenstein": "Frankenstein",
+  "liberty": "la Estatua de la Libertad",
+  "mona": "la Mona Lisa"
+};
+
+const TOTAL_VOTOS = 44; // 11 comparaciones x 4 motivos
 
 const metodos = [
   "cuantiles_barrido", "cuantiles_barridoRAP", "cuantiles_directa", "cuantiles_partes",
@@ -181,6 +190,12 @@ function mostrarPartidoActual() {
 
   const [metodoA, metodoB] = round[currentMatchIndex];
   const motivo = motivoActual();
+  const nombreMotivo = nombresLegibles[motivo] || motivo;
+  const numeroPreguntaActual = numeroVotoGlobal + 1;
+
+  document.getElementById("pregunta").innerText =
+    `¿Cuál de estos dos mosaicos te gusta más para representar a ${nombreMotivo}? ` +
+    `(pregunta ${numeroPreguntaActual}/${TOTAL_VOTOS})`;
 
   document.getElementById("contenedor-partido").innerHTML = `
     <div class="tarjeta" onclick="elegir('${metodoA}', '${metodoB}')">
