@@ -9,7 +9,7 @@
     font-family: -apple-system, Arial, sans-serif;
     background: #f5f5f5;
     margin: 0;
-    padding: 20px; 
+    padding: 20px;
     text-align: center;
     color: #222;
   }
@@ -105,6 +105,12 @@ const metodos = [
   "division_barrido", "division_barridoRAP", "division_directa", "division_partes",
   "kmeans_barrido", "kmeans_barridoRAP", "kmeans_directa", "kmeans_partes"
 ];
+
+// ======= IDENTIFICADOR DE USUARIO (aleatorio, uno por sesión) =======
+function generarIdUsuario() {
+  return 'u-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 10);
+}
+const idUsuario = generarIdUsuario();
 
 // ======= ESTADO DEL TORNEO =======
 let motivosOrden = shuffle(motivos.slice());
@@ -232,6 +238,7 @@ function enviarVoto(motivo, elegida, otra, resultado) {
     method: "POST",
     mode: "no-cors",
     body: JSON.stringify({
+      idUsuario: idUsuario,
       motivo: motivo,
       imagen_A: elegida,
       imagen_B: otra,
