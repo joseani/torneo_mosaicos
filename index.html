@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Torneo de Mosaicos</title>
-<style> 
+<style>
   body {
     font-family: -apple-system, Arial, sans-serif;
     background: #f5f5f5;
@@ -18,11 +18,6 @@
     color: #666;
     margin-bottom: 25px;
     font-size: 0.95em;
-  }
-  #instruccion {
-    font-size: 1.1em;
-    margin-bottom: 20px;
-    font-weight: bold;
   }
   #contenedor-partido {
     display: flex;
@@ -51,44 +46,113 @@
     margin: 0 auto 10px auto;
     border: 1px solid #ccc;
   }
-  .tarjeta button {
-    width: 100%;
-    padding: 10px;
-    font-size: 1em;
-    background: #4285f4;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  .tarjeta button:hover { background: #3367d6; }
   #pantalla-final {
     display: none;
   }
-  #pantalla-final table {
-    margin: 20px auto;
-    border-collapse: collapse;
-  }
-  #pantalla-final td, #pantalla-final th {
-    border: 1px solid #ccc;
-    padding: 8px 16px;
-  }
   #mensaje-espera {
     color: #4285f4;
+    font-weight: bold;
+  }
+
+  /* ---- Pantalla de bienvenida ---- */
+  #pantalla-bienvenida {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  #pantalla-bienvenida img {
+    width: 100%;
+    max-width: 600px;
+    image-rendering: pixelated;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin: 20px 0;
+  }
+  #pantalla-bienvenida p {
+    font-size: 1.05em;
+    line-height: 1.5;
+    text-align: left;
+  }
+  #boton-empezar {
+    padding: 14px 32px;
+    font-size: 1.1em;
+    background: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+  #boton-empezar:hover { background: #3367d6; }
+
+  /* ---- Galería de ganadores ---- */
+  #galeria-ganadores {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .tarjeta-ganador {
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    max-width: 200px;
+  }
+  .tarjeta-ganador img {
+    width: 100%;
+    image-rendering: pixelated;
+    border: 1px solid #ccc;
+    display: block;
+    margin-bottom: 8px;
+  }
+  .tarjeta-ganador .nombre-motivo {
     font-weight: bold;
   }
 </style>
 </head>
 <body>
 
-<h1 id="pregunta">¿Qué mosaico te gusta más?</h1>
-<div id="progreso"></div>
+<!-- ======= PANTALLA DE BIENVENIDA ======= -->
+<div id="pantalla-bienvenida">
+  <h1>Estudio de percepción de mosaicos</h1>
 
-<div id="contenedor-partido"></div>
-<div id="mensaje-espera"></div>
+  <picture>
+    <source media="(max-width: 600px)" srcset="images/todasV.png">
+    <img src="images/todasH.png" alt="Los cuatro motivos: Einstein, Frankenstein, Estatua de la Libertad y Mona Lisa">
+  </picture>
 
+  <p>
+    Estos son los cuatro motivos que vas a evaluar, reconstruidos con piezas de Tetris
+    mediante distintas técnicas: Albert Einstein, Frankenstein, la Estatua de la Libertad
+    y la Mona Lisa.
+  </p>
+  <p>
+    En cada pantalla verás dos versiones del mismo motivo. Simplemente haz click en la
+    que más te guste — no hay respuestas correctas ni incorrectas, solo cuenta tu impresión.
+  </p>
+  <p>
+    Son 44 comparaciones en total (unos 5 minutos). Tus respuestas son anónimas y se usan
+    únicamente con fines de investigación.
+  </p>
+
+  <button id="boton-empezar" onclick="empezarCuestionario()">Empezar</button>
+</div>
+
+<!-- ======= PANTALLA DEL TORNEO (oculta al inicio) ======= -->
+<div id="pantalla-torneo" style="display:none;">
+  <h1 id="pregunta">¿Qué mosaico te gusta más?</h1>
+  <div id="progreso"></div>
+
+  <div id="contenedor-partido"></div>
+  <div id="mensaje-espera"></div>
+</div>
+
+<!-- ======= PANTALLA FINAL ======= -->
 <div id="pantalla-final">
   <h2>¡Gracias por participar!</h2>
+  <p>Estos han sido los mosaicos que más te han gustado en cada motivo:</p>
+  <div id="galeria-ganadores"></div>
 </div>
 
 <script>
@@ -138,6 +202,13 @@ function shuffle(array) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+// Se llama al pulsar el botón "Empezar" de la pantalla de bienvenida
+function empezarCuestionario() {
+  document.getElementById("pantalla-bienvenida").style.display = "none";
+  document.getElementById("pantalla-torneo").style.display = "block";
+  iniciarMotivoActual();
 }
 
 function iniciarMotivoActual() {
@@ -228,15 +299,22 @@ function actualizarProgreso() {
 }
 
 function mostrarPantallaFinal() {
-  document.getElementById("contenedor-partido").style.display = "none";
-  document.getElementById("progreso").innerText = "Torneo completado";
+  document.getElementById("pantalla-torneo").style.display = "none";
   document.getElementById("pantalla-final").style.display = "block";
 
-  let filas = "<tr><th>Motivo</th><th>Método ganador</th></tr>";
+  // Mostrar visualmente los 4 mosaicos ganadores, uno por motivo
+  let html = "";
   for (const motivo of motivos) {
-    filas += `<tr><td>${motivo}</td><td>${ganadoresPorMotivo[motivo]}</td></tr>`;
+    const metodoGanador = ganadoresPorMotivo[motivo];
+    const nombreMotivo = nombresLegibles[motivo] || motivo;
+    html += `
+      <div class="tarjeta-ganador">
+        <img src="${rutaImagen(motivo, metodoGanador)}" alt="Mosaico ganador de ${nombreMotivo}">
+        <div class="nombre-motivo">${nombreMotivo}</div>
+      </div>
+    `;
   }
-  document.getElementById("tabla-ganadores").innerHTML = filas;
+  document.getElementById("galeria-ganadores").innerHTML = html;
 }
 
 function enviarVoto(motivo, elegida, otra, resultado, numeroVoto) {
@@ -255,7 +333,8 @@ function enviarVoto(motivo, elegida, otra, resultado, numeroVoto) {
 }
 
 // ======= ARRANQUE =======
-iniciarMotivoActual();
+// Ya no se llama a iniciarMotivoActual() aquí directamente:
+// ahora se dispara al pulsar el botón "Empezar" de la pantalla de bienvenida.
 </script>
 
 </body>
